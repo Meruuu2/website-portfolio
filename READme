@@ -1,1 +1,128 @@
-hiii
+# Portfolio Website — Setup Guide
+
+## Directory Structure
+
+```
+portfolio/
+│
+├── index.html                ← Single-page layout (Hero, Services, Works, About, Contact)
+│
+├── css/
+│   └── styles.css            ← All styles: dark theme, grid, cards, skeleton, lightbox
+│
+├── js/
+│   ├── supabase-config.js    ← Your Supabase URL + anon key (DO NOT commit to public repo)
+│   └── app.js                ← All logic: fetch, filter, lightbox, contact form, stats
+│
+├── assets/
+│   └── images/
+│       └── portrait.jpg      ← Your hero portrait photo (420×540px recommended)
+│
+└── database.sql              ← Full schema — run once in Supabase SQL Editor
+```
+
+---
+
+## System Architecture
+
+```
+  Browser
+    │
+    ├── index.html  (structure)
+    ├── styles.css  (dark/yellow design system)
+    └── app.js      (all logic)
+         │
+         │  @supabase/supabase-js (CDN)
+         │
+         ▼
+  Supabase (your backend)
+    │
+    ├── PostgreSQL
+    │   ├── designs           (portfolio metadata)
+    │   └── contact_messages  (form submissions)
+    │
+    └── Storage
+        └── portfolio-images/ (your image files)
+```
+
+---
+
+## Supabase Setup (step by step)
+
+### Step 1 — Create a Supabase project
+1. Go to https://supabase.com and sign in
+2. Click "New project", fill in name and password
+3. Wait ~2 min for provisioning
+
+### Step 2 — Run the SQL schema
+1. In your project dashboard, go to **SQL Editor**
+2. Paste the entire contents of `database.sql`
+3. Click **Run**
+
+### Step 3 — Create the Storage bucket
+1. Go to **Storage** → **New bucket**
+2. Name: `portfolio-images`
+3. Toggle: **Public bucket** → ON
+4. Click Create
+
+### Step 4 — Add your credentials
+Open `js/supabase-config.js` and replace:
+
+```js
+const SUPABASE_URL      = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
+```
+
+Find these at:
+**Dashboard → Settings → API → Project URL + anon/public key**
+
+### Step 5 — Upload your first image
+1. Go to **Storage → portfolio-images**
+2. Click Upload → select your image file
+3. Once uploaded, click the file → **Get URL** → copy the full URL
+4. Go to **Table Editor → designs** → Insert row
+5. Paste the URL into `image_url`, fill in `title`, `category`, etc.
+
+---
+
+## Adding New Works (ongoing)
+
+For each new design you want to showcase:
+
+1. Upload the image to **Storage → portfolio-images**
+2. Copy the public URL
+3. Insert a row in the `designs` table:
+
+| Column      | Example value                                      |
+|-------------|----------------------------------------------------|
+| title       | Jersey No. 7                                       |
+| category    | jersey  *(illustration / jersey / branding / other)* |
+| description | Custom kit for a basketball team                   |
+| image_url   | https://…supabase.co/storage/…/jersey-7.jpg        |
+| is_featured | true                                               |
+| sort_order  | 1  *(lower = appears first)*                       |
+
+The site fetches live data on every load — no redeploy needed.
+
+---
+
+## Customisation Checklist
+
+- [ ] Replace `YourName` in `index.html` and `styles.css`
+- [ ] Add your real email in the contact section of `index.html`
+- [ ] Replace `assets/images/portrait.jpg` with your photo
+- [ ] Update social media `href="#"` links in the hero
+- [ ] Update the hero bio text
+- [ ] Replace placeholder stat values with real numbers once you have data
+- [ ] Add your real Supabase credentials to `supabase-config.js`
+
+---
+
+## Planned Updates (tell me when you're ready)
+
+- Filter by tag or client name
+- Dark/light mode toggle
+- Admin panel for uploading work without using Supabase dashboard
+- Animated scroll-triggered section reveals
+- SEO meta tags and Open Graph images
+- PWA offline support
